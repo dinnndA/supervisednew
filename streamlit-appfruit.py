@@ -25,9 +25,11 @@ def load_model_and_scaler(model_file, scaler_file=None):
 
 # Fungsi untuk prediksi
 def predict_fruit(features, model, scaler=None):
+    # Pastikan fitur dalam format 2D
+    features = [features] if isinstance(features[0], (int, float)) else features
     if scaler:
-        features = scaler.transform([features])
-    prediction_class = model.predict([features])[0]  # Prediksi kelas
+        features = scaler.transform(features)
+    prediction_class = model.predict(features)[0]  # Prediksi kelas
     prediction_label = class_to_label[prediction_class]  # Mapping ke label
     return prediction_label, prediction_class
 
@@ -59,5 +61,9 @@ for col in X.columns:
 
 # Prediksi
 if st.button("Prediksi"):
-    label, class_index = predict_fruit(input_features, model, scaler)
-    st.success(f"Model memprediksi jenis buah: {label} (Cluster: {class_index})")
+    # Validasi input
+    if any(v == 0.0 for v in input_features):
+        st.warning("Pastikan semua fitur telah diisi dengan nilai yang sesuai.")
+    else:
+        label, class_index = predict_fruit(input_features, model, scaler)
+        st.success(f"Model memprediksi jenis buah: {label} (Cluster: {class_index})")
